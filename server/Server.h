@@ -11,4 +11,23 @@
 namespace berkeley
 {
 
+/**
+ * Class describes server
+ */
+class Server{
+
+public:
+
+    explicit Server(unsigned int port);
+
+    /**
+     * Initialize server
+     */
+    void init();
+
+private:
+
+    unsigned int m_port;
+};
+
 } // berkeley

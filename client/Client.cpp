@@ -17,8 +17,6 @@ namespace berkeley
 namespace
 {
 
-auto MESSAGE_SIZE = 65535;
-
 } // anonymous
 
 } // berkeley
