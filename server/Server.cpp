@@ -97,14 +97,15 @@ void Server::init()
     for (;;)
     {
         client = sizeof(clientAddress);
-        connectionDescriptor = accept(descriptor, reinterpret_cast<sockaddr*>(&clientAddress), &client);
-        if(childPid = fork() == 0)
+        connectionDescriptor = accept(
+            descriptor, reinterpret_cast<sockaddr*>(&clientAddress), &client);
+        if (childPid = fork() == 0)
         {
-         close(descriptor);
-         echo(connectionDescriptor);
-         exit(0);
+            close(descriptor);
+            echo(connectionDescriptor);
+            exit(0);
         }
-close(connectionDescriptor);
+        close(connectionDescriptor);
     }
 }
 
