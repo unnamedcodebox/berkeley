@@ -10,5 +10,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 message ("Compile flags: ${CMAKE_CXX_FLAGS}")
 
+add_subdirectory(halifax)
 add_subdirectory(server)
 add_subdirectory(client)

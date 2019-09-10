@@ -9,4 +9,4 @@ add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} gtest)
+target_link_libraries(${PROJECT_NAME} gtest halifax)
