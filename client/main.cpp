@@ -8,16 +8,16 @@ using namespace berkeley;
 
 constexpr auto DEFAULT_PORT = 9998;
 
-std::shared_ptr<Client> createClient()
+std::shared_ptr<Client> createClient(int port)
 {
-    return std::make_shared<Client>(DEFAULT_PORT);
+    return std::make_shared<Client>(port);
 }
 
 } // anonymous
 
 int main(int argc, char *argv[])
 {
-    auto client = createClient();
+    auto client = createClient(DEFAULT_PORT);
     client->init();
     return 0;
 }
