@@ -1,41 +1,43 @@
-/** @file
- * @brief     Client declaration
- *
- * @ingroup   Berkeley
- *
- * @copyright (C) 2019
- */
+///** @file
+// * @brief     Client declaration
+// *
+// * @ingroup   Berkeley
+// *
+// * @copyright (C) 2019
+// */
 
-#include <string.h>
-#include <bits/types/FILE.h>
+//#include <string.h>
+//#include <bits/types/FILE.h>
 
-#pragma once
+//#pragma once
 
-namespace berkeley
-{
+//namespace berkeley
+//{
 
-/**
- * Class describes client
- */
-class Client
-{
+///**
+// * Class describes client
+// */
+//class Client
+//{
 
-public:
-    explicit Client(unsigned int port);
+//public:
+//    explicit Client(unsigned int port);
 
-    /**
-     * Initialize client
-     */
-    void init();
+//    /**
+//     * Initialize client
+//     */
+//    int init();
 
-    /**
-     * Process method
-     */
-    void process(FILE *fp, int descriptor);
+//    /**
+//     * Process method
+//     */
+//    void process(FILE *fp, int descriptor);
 
-private:
+//private:
 
-    unsigned int m_port;
-};
+//    unsigned int m_port;
+//};
 
-} // berkeley
+//int socketFileDescriptor(int family, int type, int protocol);
+
+//} // berkeley

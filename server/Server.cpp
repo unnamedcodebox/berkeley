@@ -84,44 +84,44 @@ void listenSocket(int descriptor, int backlog)
     }
 }
 
-ssize_t
-readline(int fd, void *vptr, ssize_t maxlen)
-{
-    ssize_t	n, rc;
-    char	c, *ptr;
+//ssize_t
+//readline(int fd, void *vptr, ssize_t maxlen)
+//{
+//    ssize_t	n, rc;
+//    char	c, *ptr;
 
-    ptr = static_cast<char*>(vptr);
-    for (n = 1; n < maxlen; n++) {
-        if ( (rc = read(fd, &c, 1)) == 1) {
-            *ptr++ = c;
-            if (c == '\n')
-                break;
-        } else if (rc == 0) {
-            if (n == 1)
-                return(0);	/* EOF, no data read */
-            else
-                break;		/* EOF, some data was read */
-        } else
-            return(-1);	/* error */
-    }
+//    ptr = static_cast<char*>(vptr);
+//    for (n = 1; n < maxlen; n++) {
+//        if ( (rc = read(fd, &c, 1)) == 1) {
+//            *ptr++ = c;
+//            if (c == '\n')
+//                break;
+//        } else if (rc == 0) {
+//            if (n == 1)
+//                return(0);	/* EOF, no data read */
+//            else
+//                break;		/* EOF, some data was read */
+//        } else
+//            return(-1);	/* error */
+//    }
 
-    *ptr = 0;
-    return(n);
-}
-/* end readline */
+//    *ptr = 0;
+//    return(n);
+//}
+///* end readline */
 
-size_t
-readMessageFromSocket(int fd, void *ptr, ssize_t maxlen)
-{
-    auto n = readline(fd, ptr, maxlen);
+//size_t
+//readMessageFromSocket(int fd, void *ptr, ssize_t maxlen)
+//{
+//    auto n = readline(fd, ptr, maxlen);
 
-    if ( n == -1)
-    {
-        std::cerr << READLINE_ERROR;
-    }
+//    if ( n == -1)
+//    {
+//        std::cerr << READLINE_ERROR;
+//    }
 
-    return n;
-}
+//    return n;
+//}
 
 SocketAddress toSockaddrPointer(sockaddr_in* addr)
 {
@@ -170,15 +170,16 @@ void Server::echo(int socketDescriptor)
 {
 
     char line[MESSAGE_MAX_LENGTH];
-    auto n = readMessageFromSocket(socketDescriptor, &line, MESSAGE_MAX_LENGTH);
+    auto read = recv(socketDescriptor, &line, MESSAGE_MAX_LENGTH, 0);
 
     while(true)
     {
-        if (n == 0)
+        if (read == 0)
         {
             return;
         }
-        write(socketDescriptor,line,n);
+        send(socketDescriptor,line,read, 0);
+//         if (error < 0) on_error("Client write failed\n");
     }
 }
 
