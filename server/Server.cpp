@@ -107,8 +107,11 @@ readMessageFromSocket(int fd, void *ptr, ssize_t maxlen)
     auto n = readline(fd, ptr, maxlen);
 
     if ( n == -1)
+    {
         std::cerr << READLINE_ERROR;
-    return(n);
+    }
+
+    return n;
 }
 
 ssize_t						/* Write "n" bytes to a descriptor. */
