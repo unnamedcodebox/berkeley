@@ -117,8 +117,7 @@ readMessageFromSocket(int fd, void *ptr, ssize_t maxlen)
 
 ssize_t						/* Write "n" bytes to a descriptor. */
 writen(int fd, const void *vptr, size_t n)
-{
-    size_t		nleft;
+{    size_t		nleft;
     ssize_t		nwritten;
     const char	*ptr;
 
@@ -134,8 +133,17 @@ writen(int fd, const void *vptr, size_t n)
 
         nleft -= nwritten;
         ptr   += nwritten;
+//    auto message = std::string();
+//    std::getline(std::cin, message);
+//    nwritten = write(fd, message.c_str(), sizeof (message.c_str()));
+//    if(nwritten <= 0)
+//    {
+//        nwritten = 0;
+//        if(nwritten == -1)
+//        std::cerr << WRITE_ERROR;
     }
-    return(n);
+
+    return n;
 }
 /* end writen */
 
