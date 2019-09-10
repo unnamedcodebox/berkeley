@@ -25,6 +25,11 @@ public:
      */
     void init();
 
+    /**
+     * Echo client message
+     */
+    void echo(int descriptor);
+
 private:
 
     unsigned int m_port;

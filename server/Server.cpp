@@ -21,9 +21,12 @@ namespace berkeley
 namespace
 {
 
+constexpr auto LISTENQ = 1024;
 constexpr auto SOCKET_ERROR = "SOCKET ERROR";
 constexpr auto BIND_ERROR = "BIND ERROR";
 constexpr auto LISTEN_ERROR = "LISTEN ERROR";
+constexpr auto READLINE_ERROR = "READLINE ERROR";
+constexpr auto WRITE_ERROR = "WRITE ERROR";
 
 int socketFileDescriptor(int family, int type, int protocol)
 {
@@ -72,6 +75,76 @@ void listenSocket(int descriptor, int backlog)
     }
 }
 
+ssize_t
+readline(int fd, void *vptr, ssize_t maxlen)
+{
+    ssize_t	n, rc;
+    char	c, *ptr;
+
+    ptr = static_cast<char*>(vptr);
+    for (n = 1; n < maxlen; n++) {
+        if ( (rc = read(fd, &c, 1)) == 1) {
+            *ptr++ = c;
+            if (c == '\n')
+                break;
+        } else if (rc == 0) {
+            if (n == 1)
+                return(0);	/* EOF, no data read */
+            else
+                break;		/* EOF, some data was read */
+        } else
+            return(-1);	/* error */
+    }
+
+    *ptr = 0;
+    return(n);
+}
+/* end readline */
+
+size_t
+readMessageFromSocket(int fd, void *ptr, ssize_t maxlen)
+{
+    auto n = readline(fd, ptr, maxlen);
+
+    if ( n == -1)
+        std::cerr << READLINE_ERROR;
+    return(n);
+}
+
+ssize_t						/* Write "n" bytes to a descriptor. */
+writen(int fd, const void *vptr, size_t n)
+{
+    size_t		nleft;
+    ssize_t		nwritten;
+    const char	*ptr;
+
+    ptr = static_cast<const char*>(vptr);
+    nleft = n;
+    while (nleft > 0) {
+        if ( (nwritten = write(fd, ptr, nleft)) <= 0) {
+            if (nwritten < 0 && errno == EINTR)
+                nwritten = 0;		/* and call write() again */
+            else
+                return(-1);			/* error */
+        }
+
+        nleft -= nwritten;
+        ptr   += nwritten;
+    }
+    return(n);
+}
+/* end writen */
+
+void
+Writen(int fd, void *ptr, size_t nbytes)
+{
+    if (writen(fd, ptr, nbytes)
+        != static_cast<decltype(writen(fd, ptr, nbytes))>(nbytes))
+    {
+        std::cerr << BIND_ERROR;
+    }
+}
+
 } // anonymous
 
 Server::Server(unsigned int port): m_port(port)
@@ -92,20 +165,38 @@ void Server::init()
         reinterpret_cast<sockaddr*>(&serverAddress),
         sizeof(serverAddress));
     bzero(&serverAddress, sizeof(serverAddress));
-    listenSocket(descriptor, 1024);
+    listenSocket(descriptor, LISTENQ);
 
     for (;;)
     {
         client = sizeof(clientAddress);
         connectionDescriptor = accept(
             descriptor, reinterpret_cast<sockaddr*>(&clientAddress), &client);
-        if (childPid = fork() == 0)
+        childPid = fork();
+
+        if (!childPid)
         {
             close(descriptor);
             echo(connectionDescriptor);
             exit(0);
         }
         close(connectionDescriptor);
+    }
+}
+
+void Server::echo(int descriptor)
+{
+
+    char line[65537];
+    auto n = readMessageFromSocket(descriptor, line, 65537);
+
+    for (;;)
+    {
+        if (n == 0)
+        {
+            return;
+        }
+        Writen(descriptor, line, n);
     }
 }
 
