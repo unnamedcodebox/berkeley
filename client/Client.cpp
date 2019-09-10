@@ -189,8 +189,6 @@ void Client::init()
         sizeof(serverAddress));
 
     process(stdin, descriptor);
-
-
 }
 
 void Client::process(FILE *fp, int descriptor)

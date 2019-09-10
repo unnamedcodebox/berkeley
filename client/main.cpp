@@ -19,5 +19,5 @@ int main(int argc, char *argv[])
 {
     auto client = createClient(DEFAULT_PORT);
     client->init();
-    return 0;
+    exit(0);
 }

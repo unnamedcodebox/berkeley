@@ -22,6 +22,7 @@ namespace
 {
 
 constexpr auto LISTENQ = 1024;
+constexpr auto MESSAGE_MAX_LENGTH = 65537;
 constexpr auto SOCKET_ERROR = "SOCKET ERROR";
 constexpr auto BIND_ERROR = "BIND ERROR";
 constexpr auto LISTEN_ERROR = "LISTEN ERROR";
@@ -148,6 +149,11 @@ Writen(int fd, void *ptr, size_t nbytes)
     }
 }
 
+sockaddr* toSockaddrPointer(sockaddr_in* addr)
+{
+    return reinterpret_cast<sockaddr*>(addr);
+}
+
 } // anonymous
 
 Server::Server(unsigned int port): m_port(port)
@@ -165,7 +171,7 @@ void Server::init()
     auto serverAddress = createSocketAddress(m_port);
     attachSocketToPort(
         descriptor,
-        reinterpret_cast<sockaddr*>(&serverAddress),
+        toSockaddrPointer(&serverAddress),
         sizeof(serverAddress));
     bzero(&serverAddress, sizeof(serverAddress));
     listenSocket(descriptor, LISTENQ);
@@ -174,7 +180,7 @@ void Server::init()
     {
         client = sizeof(clientAddress);
         connectionDescriptor = accept(
-            descriptor, reinterpret_cast<sockaddr*>(&clientAddress), &client);
+            descriptor, toSockaddrPointer(&clientAddress), &client);
         childPid = fork();
 
         if (!childPid)
@@ -190,8 +196,8 @@ void Server::init()
 void Server::echo(int descriptor)
 {
 
-    char line[65537];
-    auto n = readMessageFromSocket(descriptor, line, 65537);
+    char line[MESSAGE_MAX_LENGTH];
+    auto n = readMessageFromSocket(descriptor, line, MESSAGE_MAX_LENGTH);
 
     for (;;)
     {

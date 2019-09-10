@@ -19,6 +19,7 @@ namespace berkeley
  */
 class Client
 {
+
 public:
     explicit Client(unsigned int port);
 
