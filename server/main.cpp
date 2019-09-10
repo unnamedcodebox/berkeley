@@ -1,7 +1,18 @@
 #include "Server.h"
 
-#include <memory>
 
+#include <memory>
+#include <stdio.h>
+#include <cstring>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <netinet/in.h>
+#include <iostream>
+
+#include <cstdlib>
+#include <cstdio>
+
+#include <strings.h>
 namespace
 {
 using namespace berkeley;
@@ -21,3 +32,4 @@ int main(int argc, char *argv[])
     server->init();
     return 0;
 }
+

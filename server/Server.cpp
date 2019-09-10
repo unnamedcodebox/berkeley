@@ -9,7 +9,10 @@
 #include "Server.h"
 
 #include <iostream>
-
+#include <stdio.h>
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <netinet/in.h>
@@ -21,6 +24,10 @@ namespace berkeley
 namespace
 {
 
+using SocketAddress  = sockaddr*;
+using SocketLength = socklen_t;
+using Socket = int;
+
 constexpr auto LISTENQ = 1024;
 constexpr auto MESSAGE_MAX_LENGTH = 65537;
 constexpr auto SOCKET_ERROR = "SOCKET ERROR";
@@ -29,32 +36,33 @@ constexpr auto LISTEN_ERROR = "LISTEN ERROR";
 constexpr auto READLINE_ERROR = "READLINE ERROR";
 constexpr auto WRITE_ERROR = "WRITE ERROR";
 
-int socketFileDescriptor(int family, int type, int protocol)
+Socket createSocket(int family, int type, int protocol)
 {
-    auto descriptor = socket(family, type, protocol);
+    auto socket = ::socket(family, type, protocol);
 
-    if (descriptor < 0)
+    if (socket < 0)
     {
         std::cerr << SOCKET_ERROR;
     }
-    return descriptor;
+    return socket;
 }
 
-int attachSocketToPort(
-    int socketFileDescriptor, sockaddr* address, socklen_t length)
+int bindSocket(
+    int socket, SocketAddress address, SocketLength length)
 {
-    auto attached = bind(socketFileDescriptor, address, length);
+    auto binded = bind(socket, address, length);
 
-    if (attached < 0)
+    if (binded < 0)
     {
         std::cerr << BIND_ERROR;
     }
-    return attached;
+    return binded;
 }
 
 sockaddr_in createSocketAddress(int port)
 {
     auto address = sockaddr_in();
+    memset(&address, 0, sizeof(address));
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(port);
@@ -67,7 +75,7 @@ void listenSocket(int descriptor, int backlog)
     auto ptr = getenv("LISTENQ");
     if (ptr != nullptr)
     {
-        backlog = std::atoi(ptr);
+        backlog = std::stoi(ptr);
     }
 
     if (listen(descriptor, backlog))
@@ -115,51 +123,9 @@ readMessageFromSocket(int fd, void *ptr, ssize_t maxlen)
     return n;
 }
 
-ssize_t						/* Write "n" bytes to a descriptor. */
-writen(int fd, const void *vptr, size_t n)
-{    size_t		nleft;
-    ssize_t		nwritten;
-    const char	*ptr;
-
-    ptr = static_cast<const char*>(vptr);
-    nleft = n;
-    while (nleft > 0) {
-        if ( (nwritten = write(fd, ptr, nleft)) <= 0) {
-            if (nwritten < 0 && errno == EINTR)
-                nwritten = 0;		/* and call write() again */
-            else
-                return(-1);			/* error */
-        }
-
-        nleft -= nwritten;
-        ptr   += nwritten;
-//    auto message = std::string();
-//    std::getline(std::cin, message);
-//    nwritten = write(fd, message.c_str(), sizeof (message.c_str()));
-//    if(nwritten <= 0)
-//    {
-//        nwritten = 0;
-//        if(nwritten == -1)
-//        std::cerr << WRITE_ERROR;
-    }
-
-    return n;
-}
-/* end writen */
-
-void
-Writen(int fd, void *ptr, size_t nbytes)
+SocketAddress toSockaddrPointer(sockaddr_in* addr)
 {
-    if (writen(fd, ptr, nbytes)
-        != static_cast<decltype(writen(fd, ptr, nbytes))>(nbytes))
-    {
-        std::cerr << BIND_ERROR;
-    }
-}
-
-sockaddr* toSockaddrPointer(sockaddr_in* addr)
-{
-    return reinterpret_cast<sockaddr*>(addr);
+    return reinterpret_cast<SocketAddress>(addr);
 }
 
 } // anonymous
@@ -173,25 +139,24 @@ void Server::init()
 {
     auto client = socklen_t();
     pid_t childPid;
-    auto descriptor = socketFileDescriptor(AF_INET, SOCK_STREAM, 0);
+    auto descriptor = createSocket(AF_INET, SOCK_STREAM, 0);
     auto connectionDescriptor = 0;
     auto clientAddress = sockaddr_in();
     auto serverAddress = createSocketAddress(m_port);
-    attachSocketToPort(
+    bindSocket(
         descriptor,
         toSockaddrPointer(&serverAddress),
         sizeof(serverAddress));
-    bzero(&serverAddress, sizeof(serverAddress));
     listenSocket(descriptor, LISTENQ);
 
-    for (;;)
+    while(true)
     {
         client = sizeof(clientAddress);
         connectionDescriptor = accept(
             descriptor, toSockaddrPointer(&clientAddress), &client);
         childPid = fork();
 
-        if (!childPid)
+        if (childPid == 0)
         {
             close(descriptor);
             echo(connectionDescriptor);
@@ -201,19 +166,19 @@ void Server::init()
     }
 }
 
-void Server::echo(int descriptor)
+void Server::echo(int socketDescriptor)
 {
 
     char line[MESSAGE_MAX_LENGTH];
-    auto n = readMessageFromSocket(descriptor, line, MESSAGE_MAX_LENGTH);
+    auto n = readMessageFromSocket(socketDescriptor, &line, MESSAGE_MAX_LENGTH);
 
-    for (;;)
+    while(true)
     {
         if (n == 0)
         {
             return;
         }
-        Writen(descriptor, line, n);
+        write(socketDescriptor,line,n);
     }
 }
 
