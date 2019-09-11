@@ -23,23 +23,27 @@ namespace berkeley
 namespace
 {
 
-//auto MESSAGE_MAX_LENGTH = 65537;
+// auto MESSAGE_MAX_LENGTH = 65537;
 
-} // namespace anonymous
+} // namespace
 
 Server::Server(unsigned int port) : m_port(port) {}
 
 void Server::init()
 {
-    auto LISTENQ = 10;
+    auto LISTENQ = 5;
     pid_t childPid;
+
     auto listenedSocket = sockets::socket(AF_INET, SOCK_STREAM, 0);
+
     auto clientAddress = sockaddr_in();
     auto serverAddress = sockets_helpers::createSocketAddress(m_port);
+
     sockets::bind(
         listenedSocket,
         sockets_helpers::toSockaddrPointer(&serverAddress),
         sizeof(serverAddress));
+
     sockets::listen(listenedSocket, LISTENQ);
 
     for (;;)
@@ -49,6 +53,7 @@ void Server::init()
             listenedSocket,
             sockets_helpers::toSockaddrPointer(&clientAddress),
             &clientLength);
+
         childPid = fork();
 
         if (childPid == -1)
@@ -59,18 +64,22 @@ void Server::init()
         {
             auto buff = new char[65537];
             close(listenedSocket);
-            process(connectedSocket, [connectedSocket, buff]() {
-                while(true)
+
+            auto processor = [connectedSocket, buff]()
+            {
+                while (true)
                 {
-                    if(recv(connectedSocket, buff, sizeof(buff), 0) == 0)
+                    if (recv(connectedSocket, buff, sizeof(buff), 0) <= 0)
                     {
                         return;
                     }
-//                    std::cout << "Received: " << buff;
-                    send(connectedSocket, buff, sizeof (buff), 0);
+                    std::cout << "Received: " << buff;
+                    send(connectedSocket, buff, sizeof(buff), 0);
                 }
-            });
-            delete buff;
+            };
+
+            process(connectedSocket, processor);
+            delete[] buff;
         }
         close(connectedSocket);
     }

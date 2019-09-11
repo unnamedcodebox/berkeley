@@ -116,13 +116,14 @@ sockaddr* toSockaddrPointer(sockaddr_in* addr)
 
 } // namespace sockets_helpers
 
-namespace address {
+namespace address
+{
 
 void toBinary(int family, const char* string, void* address)
 {
     inet_pton(family, string, address);
 }
 
-}
+} // namespace address
 
 } // namespace berkeley
