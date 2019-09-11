@@ -56,11 +56,7 @@ void Server::init()
 
         childPid = fork();
 
-        if (childPid == -1)
-        {
-            std::cerr << "FORK ERROR";
-        }
-        else
+        if (childPid == 0)
         {
             auto buff = new char[65537];
             close(listenedSocket);
@@ -73,7 +69,6 @@ void Server::init()
                     {
                         return;
                     }
-                    std::cout << "Received: " << buff;
                     send(connectedSocket, buff, sizeof(buff), 0);
                 }
             };
