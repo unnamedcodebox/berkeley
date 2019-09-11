@@ -7,6 +7,7 @@
  */
 
 #include "Server.h"
+#include "../halifax/Socket.h"
 
 #include <iostream>
 
@@ -21,36 +22,13 @@ namespace berkeley
 namespace
 {
 
-constexpr auto LISTENQ = 1024;
+constexpr auto LISTENQ = 10;
 constexpr auto MESSAGE_MAX_LENGTH = 65537;
 constexpr auto SOCKET_ERROR = "SOCKET ERROR";
 constexpr auto BIND_ERROR = "BIND ERROR";
 constexpr auto LISTEN_ERROR = "LISTEN ERROR";
 constexpr auto READLINE_ERROR = "READLINE ERROR";
 constexpr auto WRITE_ERROR = "WRITE ERROR";
-
-int socketFileDescriptor(int family, int type, int protocol)
-{
-    auto descriptor = socket(family, type, protocol);
-
-    if (descriptor < 0)
-    {
-        std::cerr << SOCKET_ERROR;
-    }
-    return descriptor;
-}
-
-int attachSocketToPort(
-    int socketFileDescriptor, sockaddr* address, socklen_t length)
-{
-    auto attached = bind(socketFileDescriptor, address, length);
-
-    if (attached < 0)
-    {
-        std::cerr << BIND_ERROR;
-    }
-    return attached;
-}
 
 sockaddr_in createSocketAddress(int port)
 {
@@ -63,19 +41,6 @@ sockaddr_in createSocketAddress(int port)
     return address;
 }
 
-void listenSocket(int descriptor, int backlog)
-{
-    auto ptr = getenv("LISTENQ");
-    if (ptr != nullptr)
-    {
-        backlog = std::atoi(ptr);
-    }
-
-    if (listen(descriptor, backlog))
-    {
-        std::cerr << LISTEN_ERROR;
-    }
-}
 
 ssize_t
 readline(int fd, void *vptr, ssize_t maxlen)
@@ -165,23 +130,22 @@ Server::Server(unsigned int port): m_port(port)
 void Server::init()
 {
     pid_t childPid;
-    auto descriptor = socketFileDescriptor(AF_INET, SOCK_STREAM, 0);
-    auto connectionDescriptor = 0;
+    auto listenedSocket = sockets::socket(AF_INET, SOCK_STREAM, 0);
     auto clientAddress = sockaddr_in();
 
     auto serverAddress = createSocketAddress(m_port);
-    attachSocketToPort(
-        descriptor,
+    sockets::bind(
+        listenedSocket,
         toSockaddrPointer(&serverAddress),
         sizeof(serverAddress));
 
-    listenSocket(descriptor, LISTENQ);
+    sockets::listen(listenedSocket, LISTENQ);
 
     for (;;)
     {
         auto clientLength = static_cast<socklen_t>(sizeof(clientAddress));
-        connectionDescriptor = accept(
-            descriptor, toSockaddrPointer(&clientAddress), &clientLength);
+        auto connectedSocket = accept(
+            listenedSocket, toSockaddrPointer(&clientAddress), &clientLength);
         childPid = fork();
 
         if (childPid == -1)
@@ -190,11 +154,11 @@ void Server::init()
         }
         else
         {
-            close(descriptor);
-            echo(connectionDescriptor);
+            close(listenedSocket);
+            echo(connectedSocket);
             exit(0);
         }
-        close(connectionDescriptor);
+        close(connectedSocket);
     }
 }
 

@@ -42,7 +42,7 @@ sockaddr_in createSocketAddress(int port);
 void listen(int socket, int backlog);
 
 /**
- * Connect TCP client to TCP server
+ * Connect client to server
  */
 void connect(
     int socket, const struct sockaddr* serverAddress, socklen_t addressLength);
