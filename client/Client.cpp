@@ -116,12 +116,12 @@ readMessageFromSocket(int fd, void *ptr, ssize_t maxlen)
     return n;
 }
 
-//ssize_t						/* Write "n" bytes to a descriptor. */
-//writen(int fd, const void *vptr, size_t n)
-//{
+ssize_t						/* Write "n" bytes to a descriptor. */
+writen(int fd, const void *vptr, size_t n)
+{
 
-//    size_t		nleft;
-//    ssize_t		nwritten;
+    //size_t		nleft;
+    ssize_t		nwritten;
 //    const char	*ptr;
 
 //    ptr = static_cast<const char*>(vptr);
@@ -136,29 +136,29 @@ readMessageFromSocket(int fd, void *ptr, ssize_t maxlen)
 
 //        nleft -= nwritten;
 //        ptr   += nwritten;
-////    auto message = std::string();
-////    std::getline(std::cin, message);
-////    nwritten = write(fd, message.c_str(), sizeof (message.c_str()));
-////    if(nwritten <= 0)
-////    {
-////        nwritten = 0;
-////        if(nwritten == -1)
-////        std::cerr << WRITE_ERROR;
-////    }
-//}
-//    return n;
-//}
+    auto message = std::string();
+    std::getline(std::cin, message);
+    nwritten = write(fd, message.c_str(), sizeof (message.c_str()));
+    if(nwritten <= 0)
+    {
+        nwritten = 0;
+        if(nwritten == -1)
+        std::cerr << WRITE_ERROR;
+    }
+
+    return n;
+}
 /* end writen */
 
-//void
-//Writen(int fd, void *ptr, size_t nbytes)
-//{
-//    if (writen(fd, ptr, nbytes)
-//        != static_cast<decltype(writen(fd, ptr, nbytes))>(nbytes))
-//    {
-//        std::cerr << BIND_ERROR;
-//    }
-//}
+void
+Writen(int fd, void *ptr, size_t nbytes)
+{
+    if (writen(fd, ptr, nbytes)
+        != static_cast<decltype(writen(fd, ptr, nbytes))>(nbytes))
+    {
+        std::cerr << BIND_ERROR;
+    }
+}
 
 void
 Inet_pton(int family, const char *strptr, void *addrptr)
@@ -184,33 +184,33 @@ Client::Client(unsigned int port): m_port(port)
 
 void Client::init()
 {
-    auto socket = socketFileDescriptor(AF_INET, SOCK_STREAM, 0);
+    auto descriptor = socketFileDescriptor(AF_INET, SOCK_STREAM, 0);
 
     auto serverAddress = sockaddr_in();
     bzero(&serverAddress, sizeof(serverAddress));
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(m_port);
+
     Inet_pton(AF_INET, "127.0.0.1", &serverAddress.sin_addr);
 
     connect(
-        socket,
+        descriptor,
         reinterpret_cast<sockaddr*>(&serverAddress),
         sizeof(serverAddress));
 
-    process(stdin, socket);
-    exit(0);
+    process(stdin, descriptor);
 }
 
 void Client::process(FILE *fp, int descriptor)
 {
-    char sendLine[5];
-    char recvLine[5];
+    char sendLine[65537];
+    char recvLine[65537];
 
-    while(fgets(sendLine, 5, fp) != NULL)
+    while(fgets(sendLine, 65537, fp) != NULL)
     {
-        write(descriptor, sendLine, 5);
+        Writen(descriptor, sendLine, strlen(sendLine));
 
-        if(readMessageFromSocket(descriptor, recvLine, 5) == 0)
+        if(readMessageFromSocket(descriptor, recvLine, 65537) == 0)
         {
             std::cerr << "MUR MUR MUSYA MUSYA";
         }
