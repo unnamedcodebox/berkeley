@@ -26,9 +26,12 @@ public:
     void init();
 
     /**
-     * Echo client message
+     * Process method
      */
-    void echo(int descriptor);
+    template <typename T> void process(int connectedSocket, T process)
+    {
+        process();
+    }
 
 private:
 

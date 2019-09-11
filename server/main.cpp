@@ -6,7 +6,7 @@ namespace
 {
 using namespace berkeley;
 
-constexpr auto DEFAULT_PORT = 9998;
+constexpr auto DEFAULT_PORT = 9997;
 
 std::shared_ptr<Server> createServer(int port)
 {

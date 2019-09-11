@@ -8,6 +8,7 @@
 
 #include "Socket.h"
 
+#include <arpa/inet.h>
 #include <iostream>
 #include <strings.h>
 
@@ -29,8 +30,7 @@ void errorMessage(std::string message)
     std::cerr << message;
 }
 
-} // anonymous
-
+} // namespace
 
 namespace sockets
 {
@@ -46,8 +46,7 @@ int socket(int family, int type, int protocol)
     return socketDescriptor;
 }
 
-int bind(
-    int socket, sockaddr* address, socklen_t length)
+int bind(int socket, sockaddr* address, socklen_t length)
 {
     auto binded = ::bind(socket, address, length);
 
@@ -58,20 +57,9 @@ int bind(
     return binded;
 }
 
-sockaddr_in createSocketAddress(int port)
-{
-    auto address = sockaddr_in();
-    bzero(&address, sizeof(address));
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(port);
-
-    return address;
-}
-
 void listen(int socket, int backlog)
 {
-    char *ptr;
+    char* ptr;
     if ((ptr = getenv("LISTENQ")) != NULL)
     {
         backlog = std::stoi(ptr);
@@ -83,9 +71,9 @@ void listen(int socket, int backlog)
     }
 }
 
-void connect(int socket, const sockaddr *serverAddress, socklen_t addressLength)
+void connect(int socket, const sockaddr* serverAddress, socklen_t addressLength)
 {
-    if(::connect(socket, serverAddress, addressLength) < 0)
+    if (::connect(socket, serverAddress, addressLength) < 0)
     {
         errorMessage(CONNECT_ERROR);
     }
@@ -104,6 +92,37 @@ int accept(
     return connectedSocket;
 }
 
-} // sockets
+} // namespace sockets
 
-} // berkeley
+namespace sockets_helpers
+{
+
+sockaddr_in createSocketAddress(int port)
+{
+    auto address = sockaddr_in();
+    bzero(&address, sizeof(address));
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(port);
+
+    return address;
+}
+
+sockaddr* toSockaddrPointer(sockaddr_in* addr)
+{
+
+    return reinterpret_cast<sockaddr*>(addr);
+}
+
+} // namespace sockets_helpers
+
+namespace address {
+
+void toBinary(int family, const char* string, void* address)
+{
+    inet_pton(family, string, address);
+}
+
+}
+
+} // namespace berkeley

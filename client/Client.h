@@ -6,8 +6,6 @@
  * @copyright (C) 2019
  */
 
-#include <string.h>
-#include <bits/types/FILE.h>
 #include "../halifax/Socket.h"
 
 #pragma once
@@ -32,7 +30,11 @@ public:
     /**
      * Process method
      */
-    int process(FILE *fp, int sock);
+    template <typename Processor>
+    void process(Processor processor)
+    {
+        processor();
+    }
 
 private:
 

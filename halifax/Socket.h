@@ -32,11 +32,6 @@ int socket(int family, int type, int protocol);
 int bind(int socket, sockaddr* address, socklen_t length);
 
 /**
- * Create socket address
- */
-sockaddr_in createSocketAddress(int port);
-
-/**
  * Listen socket
  */
 void listen(int socket, int backlog);
@@ -54,5 +49,24 @@ int accept(
     int listeningSocket, sockaddr* clientAddress, socklen_t* addressLength);
 
 } // namespace sockets
+
+namespace sockets_helpers
+{
+
+sockaddr* toSockaddrPointer(sockaddr_in* addr);
+
+/**
+ * Create socket address
+ */
+sockaddr_in createSocketAddress(int port);
+
+} // namespace sockets_helpers
+
+namespace address
+{
+
+void toBinary(int family, const char* string, void* address);
+
+} // namespace addresses
 
 } // namespace berkeley
