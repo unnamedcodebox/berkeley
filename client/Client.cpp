@@ -119,31 +119,30 @@ readMessageFromSocket(int fd, void *ptr, ssize_t maxlen)
 ssize_t						/* Write "n" bytes to a descriptor. */
 writen(int fd, const void *vptr, size_t n)
 {
-
-    //size_t		nleft;
+    size_t		nleft;
     ssize_t		nwritten;
-//    const char	*ptr;
+    const char	*ptr;
 
-//    ptr = static_cast<const char*>(vptr);
-//    nleft = n;
-//    while (nleft > 0) {
-//        if ( (nwritten = write(fd, ptr, nleft)) <= 0) {
-//            if (nwritten < 0 && errno == EINTR)
-//                nwritten = 0;		/* and call write() again */
-//            else
-//                return(-1);			/* error */
-//        }
+    ptr = static_cast<const char*>(vptr);
+    nleft = n;
+    while (nleft > 0) {
+        if ( (nwritten = write(fd, ptr, nleft)) <= 0) {
+            if (nwritten < 0 && errno == EINTR)
+                nwritten = 0;		/* and call write() again */
+            else
+                return(-1);			/* error */
+        }
 
-//        nleft -= nwritten;
-//        ptr   += nwritten;
-    auto message = std::string();
-    std::getline(std::cin, message);
-    nwritten = write(fd, message.c_str(), sizeof (message.c_str()));
-    if(nwritten <= 0)
-    {
-        nwritten = 0;
-        if(nwritten == -1)
-        std::cerr << WRITE_ERROR;
+        nleft -= nwritten;
+        ptr   += nwritten;
+//    auto message = std::string();
+//    std::getline(std::cin, message);
+//    nwritten = write(fd, message.c_str(), sizeof (message.c_str()));
+//    if(nwritten <= 0)
+//    {
+//        nwritten = 0;
+//        if(nwritten == -1)
+//        std::cerr << WRITE_ERROR;
     }
 
     return n;
