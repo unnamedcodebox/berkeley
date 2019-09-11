@@ -5,7 +5,7 @@
  *
  * @copyright (C) 2019
  */
-
+#define _OE_SOCKETS
 #include "Server.h"
 #include "../halifax/Socket.h"
 
@@ -65,14 +65,15 @@ void Server::init()
                 auto buff = new char[65537];
                 while (true)
                 {
-                    if (recv(connectedSocket, buff, sizeof(buff), 0) <= 0)
+                    auto received =  recv(connectedSocket, buff, sizeof(*buff), 0);
+                    if (received <= 0)
                     {
                         std::cerr << "READ ERROR";
                         break;
                     }
-                    if(send(connectedSocket, buff, sizeof(buff), 0) != sizeof (buff))
+                    if(send(connectedSocket, buff, received, 0) != sizeof (*buff))
                     {
-                        std::cerr << "SEND ERROR";
+                        std::cerr << "SEND ERROR: size of sended: " << sizeof (*buff);
                     };
                 }
                 delete[] buff;
