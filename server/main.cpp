@@ -19,5 +19,4 @@ int main(int argc, char *argv[])
 {
     auto server = createServer(DEFAULT_PORT);
     server->init();
-    return 0;
 }

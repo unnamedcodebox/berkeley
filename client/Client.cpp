@@ -59,10 +59,12 @@ void Client::init()
         sizeof(serverAddress));
 
      // TODO - Client processor
-    auto sendBuff = new char[65537];
-    auto replyBuff = new char [65537];
 
-    auto processor = [socket, sendBuff, replyBuff]() {
+
+    auto processor = [socket]() {
+        auto sendBuff = new char[65537];
+        auto replyBuff = new char [65537];
+
         while (true)
         {
             std::cin.getline(sendBuff, 65537);
@@ -74,11 +76,11 @@ void Client::init()
             }
             printMessage(replyBuff);
         }
+        delete[] sendBuff;
+        delete[] replyBuff;
     };
 
     process(processor);
-    delete[] sendBuff;
-    delete[] replyBuff;
 }
 
 } // namespace berkeley

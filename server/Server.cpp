@@ -16,6 +16,7 @@
 #include <netinet/in.h>
 #include <strings.h>
 #include <cstring>
+#include <iostream>
 
 namespace berkeley
 {
@@ -23,7 +24,7 @@ namespace berkeley
 namespace
 {
 
-// auto MESSAGE_MAX_LENGTH = 65537;
+
 
 } // namespace
 
@@ -58,23 +59,30 @@ void Server::init()
 
         if (childPid == 0)
         {
-            auto buff = new char[65537];
-            close(listenedSocket);
-
-            auto processor = [connectedSocket, buff]()
+            auto processor = [connectedSocket]()
             {
+                auto buff = new char[65537];
                 while (true)
                 {
                     if (recv(connectedSocket, buff, sizeof(buff), 0) <= 0)
                     {
-                        return;
+                        std::cerr << "READ ERROR";
                     }
-                    send(connectedSocket, buff, sizeof(buff), 0);
+                    if(send(connectedSocket, buff, sizeof(buff), 0) != sizeof (buff))
+                    {
+                        std::cerr << "SEND ERROR";
+                    };
                 }
+                delete[] buff;
             };
 
-            process(connectedSocket, processor);
-            delete[] buff;
+            close(listenedSocket);
+            process(processor);
+            exit(0);
+        }
+        else if(childPid == -1)
+        {
+            std::cerr << "FORK ERROR";
         }
         close(connectedSocket);
     }

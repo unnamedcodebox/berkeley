@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <functional>
+
 namespace berkeley
 {
 
@@ -28,9 +30,9 @@ public:
     /**
      * Process method
      */
-    template <typename T> void process(int connectedSocket, T process)
+   void process(std::function<void()> processor)
     {
-        process();
+        processor();
     }
 
 private:
