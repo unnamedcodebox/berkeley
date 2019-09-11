@@ -32,7 +32,7 @@ int socket(int family, int type, int protocol);
 int bind(int socket, sockaddr* address, socklen_t length);
 
 /**
- * Create socket adddress
+ * Create socket address
  */
 sockaddr_in createSocketAddress(int port);
 
