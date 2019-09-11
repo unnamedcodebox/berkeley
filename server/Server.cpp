@@ -55,6 +55,7 @@ int attachSocketToPort(
 sockaddr_in createSocketAddress(int port)
 {
     auto address = sockaddr_in();
+    bzero(&address, sizeof(address));
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(port);
@@ -163,27 +164,31 @@ Server::Server(unsigned int port): m_port(port)
 
 void Server::init()
 {
-    auto client = socklen_t();
     pid_t childPid;
     auto descriptor = socketFileDescriptor(AF_INET, SOCK_STREAM, 0);
     auto connectionDescriptor = 0;
     auto clientAddress = sockaddr_in();
+
     auto serverAddress = createSocketAddress(m_port);
     attachSocketToPort(
         descriptor,
         toSockaddrPointer(&serverAddress),
         sizeof(serverAddress));
-    bzero(&serverAddress, sizeof(serverAddress));
+
     listenSocket(descriptor, LISTENQ);
 
     for (;;)
     {
-        client = sizeof(clientAddress);
+        auto clientLength = static_cast<socklen_t>(sizeof(clientAddress));
         connectionDescriptor = accept(
-            descriptor, toSockaddrPointer(&clientAddress), &client);
+            descriptor, toSockaddrPointer(&clientAddress), &clientLength);
         childPid = fork();
 
-        if (!childPid)
+        if (childPid == -1)
+        {
+            std::cerr << "FORK ERROR";
+        }
+        else
         {
             close(descriptor);
             echo(connectionDescriptor);

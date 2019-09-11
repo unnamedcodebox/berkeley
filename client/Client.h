@@ -8,6 +8,7 @@
 
 #include <string.h>
 #include <bits/types/FILE.h>
+#include "../halifax/Socket.h"
 
 #pragma once
 
@@ -31,7 +32,7 @@ public:
     /**
      * Process method
      */
-    void process(FILE *fp, int descriptor);
+    int process(FILE *fp, int sock);
 
 private:
 

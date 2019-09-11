@@ -77,78 +77,78 @@ int socketFileDescriptor(int family, int type, int protocol)
 //    }
 //}
 
-ssize_t
-readline(int fd, void *vptr, ssize_t maxlen)
-{
-    ssize_t	n, rc;
-    char	c, *ptr;
+//ssize_t
+//readline(int fd, void *vptr, ssize_t maxlen)
+//{
+//    ssize_t	n, rc;
+//    char	c, *ptr;
 
-    ptr = static_cast<char*>(vptr);
-    for (n = 1; n < maxlen; n++) {
-        if ( (rc = read(fd, &c, 1)) == 1) {
-            *ptr++ = c;
-            if (c == '\n')
-                break;
-        } else if (rc == 0) {
-            if (n == 1)
-                return(0);	/* EOF, no data read */
-            else
-                break;		/* EOF, some data was read */
-        } else
-            return(-1);	/* error */
-    }
+//    ptr = static_cast<char*>(vptr);
+//    for (n = 1; n < maxlen; n++) {
+//        if ( (rc = read(fd, &c, 1)) == 1) {
+//            *ptr++ = c;
+//            if (c == '\n')
+//                break;
+//        } else if (rc == 0) {
+//            if (n == 1)
+//                return(0);	/* EOF, no data read */
+//            else
+//                break;		/* EOF, some data was read */
+//        } else
+//            return(-1);	/* error */
+//    }
 
-    *ptr = 0;
-    return(n);
-}
+//    *ptr = 0;
+//    return(n);
+//}
 /* end readline */
 
-size_t
-readMessageFromSocket(int fd, void *ptr, ssize_t maxlen)
-{
-    auto n = readline(fd, ptr, maxlen);
+//size_t
+//readMessageFromSocket(int fd, void *ptr, ssize_t maxlen)
+//{
+//    auto n = readline(fd, ptr, maxlen);
 
-    if ( n == -1)
-    {
-        std::cerr << READLINE_ERROR;
-    }
+//    if ( n == -1)
+//    {
+//        std::cerr << READLINE_ERROR;
+//    }
 
-    return n;
-}
+//    return n;
+//}
 
-ssize_t						/* Write "n" bytes to a descriptor. */
-writen(int fd, const void *vptr, size_t n)
-{
-    size_t		nleft;
-    ssize_t		nwritten;
-    const char	*ptr;
+//ssize_t						/* Write "n" bytes to a descriptor. */
+//writen(int fd, const void *vptr, size_t n)
+//{
+//    size_t		nleft;
+//    ssize_t		nwritten;
+//    const char	*ptr;
 
-    ptr = static_cast<const char*>(vptr);
-    nleft = n;
-    while (nleft > 0) {
-        if ( (nwritten = write(fd, ptr, nleft)) <= 0) {
-            if (nwritten < 0 && errno == EINTR)
-                nwritten = 0;		/* and call write() again */
-            else
-                return(-1);			/* error */
-        }
+//    ptr = static_cast<const char*>(vptr);
+//    nleft = n;
+//    while (nleft > 0) {
+//        if ( (nwritten = write(fd, ptr, nleft)) <= 0) {
+//            if (nwritten < 0 && errno == EINTR)
+//                nwritten = 0;		/* and call write() again */
+//            else
+//                return(-1);			/* error */
+//        }
 
-        nleft -= nwritten;
-        ptr   += nwritten;
-    }
-    return(n);
-}
+//        nleft -= nwritten;
+//        ptr   += nwritten;
+//    }
+//    return(n);
+//}
 /* end writen */
 
-void
-Writen(int fd, void *ptr, size_t nbytes)
-{
-    if (writen(fd, ptr, nbytes)
-        != static_cast<decltype(writen(fd, ptr, nbytes))>(nbytes))
-    {
-        std::cerr << BIND_ERROR;
-    }
-}
+//void
+//Writen(int fd, void *ptr, size_t nbytes)
+//{
+//    if (writen(fd, ptr, nbytes)
+//        != static_cast<decltype(writen(fd, ptr, nbytes))>(nbytes))
+//    {
+//        std::cerr << BIND_ERROR;
+//    }
+//}
 
 void
 Inet_pton(int family, const char *strptr, void *addrptr)
@@ -174,39 +174,63 @@ Client::Client(unsigned int port): m_port(port)
 
 void Client::init()
 {
-    auto descriptor = socketFileDescriptor(AF_INET, SOCK_STREAM, 0);
-
+    auto socket = socketFileDescriptor(AF_INET, SOCK_STREAM, 0);
     auto serverAddress = sockaddr_in();
     bzero(&serverAddress, sizeof(serverAddress));
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(m_port);
-
     Inet_pton(AF_INET, "127.0.0.1", &serverAddress.sin_addr);
 
     connect(
-        descriptor,
+        socket,
         reinterpret_cast<sockaddr*>(&serverAddress),
         sizeof(serverAddress));
 
-    process(stdin, descriptor);
+    process(stdin, socket);
+
+    exit(0);
 }
 
-void Client::process(FILE *fp, int descriptor)
+int Client::process(FILE *fp, int sock)
 {
-    char sendLine[65537];
-    char recvLine[65537];
+    char message[65537];
+    char server_reply[65537];
 
-    while(fgets(sendLine, 65537, fp) != NULL)
+//    while(fgets(sendLine, 65537, fp) != NULL)
+//    {
+//        Writen(descriptor, sendLine, strlen(sendLine));
+
+//        if(readMessageFromSocket(descriptor, recvLine, 65537) == 0)
+//        {
+//            std::cerr << "MUR MUR MUSYA MUSYA";
+//        }
+
+//        fputs(recvLine, stdout);
+//    }
+
+    while(1)
     {
-        Writen(descriptor, sendLine, strlen(sendLine));
+        printf("Enter message : ");
+        scanf("%s" , message);
 
-        if(readMessageFromSocket(descriptor, recvLine, 65537) == 0)
+        //Send some data
+        if( send(sock , message , strlen(message) , 0) == 0)
         {
-            std::cerr << "MUR MUR MUSYA MUSYA";
+            puts("Send failed");
+            return 1;
         }
 
-        fputs(recvLine, stdout);
+        //Receive a reply from the server
+        if( recv(sock , server_reply , 1000 , 0) == 0)
+        {
+            puts("recv failed");
+            break;
+        }
+
+        puts("Server reply :");
+        puts(server_reply);
     }
+    return 1;
 }
 
 // anonymous
