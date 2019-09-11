@@ -16,6 +16,7 @@
 #include <netinet/in.h>
 #include <strings.h>
 #include <cstring>
+#include <iostream>
 
 namespace berkeley
 {
@@ -58,23 +59,31 @@ void Server::init()
 
         if (childPid == 0)
         {
-            auto buff = new char[65537];
             close(listenedSocket);
 
-            auto processor = [connectedSocket, buff]()
+            auto processor = [connectedSocket]()
             {
+                auto buff = new char[65537];
                 while (true)
                 {
                     if (recv(connectedSocket, buff, sizeof(buff), 0) <= 0)
                     {
-                        return;
+                        break;
                     }
-                    send(connectedSocket, buff, sizeof(buff), 0);
+                    if(send(connectedSocket, buff, sizeof(buff), 0) != sizeof (buff))
+                    {
+                        std::cerr << "SEND ERROR";
+                    };
                 }
+                delete[] buff;
             };
 
             process(connectedSocket, processor);
-            delete[] buff;
+            exit(0);
+        }
+        else if(childPid == -1)
+        {
+            std::cerr << "FORK ERROR";
         }
         close(connectedSocket);
     }
