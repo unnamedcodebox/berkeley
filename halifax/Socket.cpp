@@ -110,7 +110,6 @@ sockaddr_in createSocketAddress(int port)
 
 sockaddr* toSockaddrPointer(sockaddr_in* addr)
 {
-
     return reinterpret_cast<sockaddr*>(addr);
 }
 

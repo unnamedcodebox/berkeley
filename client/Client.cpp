@@ -67,7 +67,7 @@ void Client::init()
         {
             std::cin.getline(sendBuff, 65537);
             // TODO - send and recv wrappers
-            send(socket, sendBuff, strlen(sendBuff), 0);
+            send(socket, sendBuff, strlen(sendBuff)+1, 0);
             if (recv(socket, replyBuff, 65537, 0) <= 0)
             {
                 break;
@@ -79,7 +79,6 @@ void Client::init()
     process(processor);
     delete[] sendBuff;
     delete[] replyBuff;
-
 }
 
 } // namespace berkeley
