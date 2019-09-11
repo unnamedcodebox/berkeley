@@ -59,6 +59,7 @@ void Server::init()
 
         if (childPid == 0)
         {
+            close(listenedSocket);
             auto processor = [connectedSocket]()
             {
                 auto buff = new char[65537];
@@ -67,6 +68,7 @@ void Server::init()
                     if (recv(connectedSocket, buff, sizeof(buff), 0) <= 0)
                     {
                         std::cerr << "READ ERROR";
+                        break;
                     }
                     if(send(connectedSocket, buff, sizeof(buff), 0) != sizeof (buff))
                     {
@@ -75,7 +77,6 @@ void Server::init()
                 }
                 delete[] buff;
             };
-
             close(listenedSocket);
             process(processor);
             exit(0);
