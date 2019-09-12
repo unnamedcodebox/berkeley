@@ -28,9 +28,12 @@ public:
     void init();
 
     /**
-     * Process the request method
+     * Process the request with special Processor
      */
-   void process(std::function<void()> processor);
+   template <typename Processor> void process(Processor processor)
+    {
+        processor();
+    }
 
 private:
 

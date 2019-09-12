@@ -28,7 +28,7 @@ constexpr auto MESSAGE_MAX_LENGTH = 65537;
 template <typename T>
 void printMessage(const T& message)
 {
-    std::cout << std::string("Message from server: ") << message << "\n";
+    std::cout << std::string("[Message from server]: ") << message << " || " << "\n";
 }
 
 } // anonymous

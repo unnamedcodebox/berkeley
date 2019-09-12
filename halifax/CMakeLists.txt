@@ -8,3 +8,5 @@ file(GLOB PROJECT_SOURCES
 )
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
+
+#TODO - make as git submodule

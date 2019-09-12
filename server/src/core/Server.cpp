@@ -7,6 +7,8 @@
  */
 
 #include "Server.h"
+#include "../core/MessageProcessor.h"
+
 #include "../../../halifax/Socket.h"
 
 #include <iostream>
@@ -57,6 +59,28 @@ void Server::init()
 
         if (childPid == 0)
         {
+//            auto processor = [connectedSocket]()
+//            {
+//                char buffer[65537];
+//                while (true)
+//                {
+//                    bzero(buffer, sizeof (buffer));
+//                    auto received = static_cast<ssize_t>(
+//                        recv(connectedSocket, buffer, 65537, 0));
+//                    if (received < 0)
+//                    {
+//                        std::cerr << "READ ERROR";
+//                        break;
+//                    }
+//                    if (static_cast<ssize_t>(
+//                            send(connectedSocket, buffer, received, 0)
+//                            != received))
+//                    {
+//                        std::cerr << "SEND ERROR: size of sended: "
+//                                  << sizeof(buffer);
+//                    };
+//                }
+//            };
             auto processor = [connectedSocket]()
             {
                 char buffer[65537];
@@ -70,9 +94,19 @@ void Server::init()
                         std::cerr << "READ ERROR";
                         break;
                     }
-                    if (static_cast<ssize_t>(
-                            send(connectedSocket, buffer, received, 0)
-                            != received))
+                    auto stringReceived = std::string().append(buffer, strlen(buffer));
+                    auto messageProcessor = MessageProcessor(stringReceived);
+                    auto processed = stringReceived + messageProcessor();
+                    strcpy(buffer, processed.c_str());
+//                    if (static_cast<ssize_t>(
+//                            send(connectedSocket, buffer, received, 0)
+//                            != received))
+//                    {
+//                        std::cerr << "SEND ERROR: size of sended: "
+//                                  << sizeof(buffer);
+//                    };
+                    if (send(connectedSocket, buffer, processed.length(), 0)
+                        != static_cast<int>(processed.length()))
                     {
                         std::cerr << "SEND ERROR: size of sended: "
                                   << sizeof(buffer);
@@ -89,11 +123,6 @@ void Server::init()
         }
         close(connectedSocket);
     }
-}
-
-void Server::process(std::function<void()> processor)
-{
-    processor();
 }
 
 } // namespace berkeley
