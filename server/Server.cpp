@@ -5,7 +5,7 @@
  *
  * @copyright (C) 2019
  */
-#define _OE_SOCKETS
+
 #include "Server.h"
 #include "../halifax/Socket.h"
 
@@ -23,8 +23,6 @@ namespace berkeley
 
 namespace
 {
-
-
 
 } // namespace
 
@@ -47,7 +45,7 @@ void Server::init()
 
     sockets::listen(listenedSocket, LISTENQ);
 
-    for (;;)
+    while (true)
     {
         auto clientLength = static_cast<socklen_t>(sizeof(clientAddress));
         auto connectedSocket = accept(
@@ -60,20 +58,24 @@ void Server::init()
         if (childPid == 0)
         {
             close(listenedSocket);
-            auto processor = [connectedSocket]()
-            {
-                char buff[65537];
+            auto processor = [connectedSocket]() {
+                char buffer[65537];
                 while (true)
                 {
-                    auto received =  static_cast<ssize_t>(recv(connectedSocket, buff, 65537, 0));
+                    bzero(buffer, sizeof (buffer));
+                    auto received = static_cast<ssize_t>(
+                        recv(connectedSocket, buffer, 65537, 0));
                     if (received < 0)
                     {
                         std::cerr << "READ ERROR";
                         break;
                     }
-                    if(static_cast<ssize_t>(send(connectedSocket, buff, received, 0) != received))
+                    if (static_cast<ssize_t>(
+                            send(connectedSocket, buffer, received, 0)
+                            != received))
                     {
-                        std::cerr << "SEND ERROR: size of sended: " << sizeof (buff);
+                        std::cerr << "SEND ERROR: size of sended: "
+                                  << sizeof(buffer);
                     };
                 }
             };
@@ -81,7 +83,7 @@ void Server::init()
             process(processor);
             exit(0);
         }
-        else if(childPid == -1)
+        else if (childPid == -1)
         {
             std::cerr << "FORK ERROR";
         }
@@ -89,7 +91,7 @@ void Server::init()
     }
 }
 
-void Server::process(std::function<void ()> processor)
+void Server::process(std::function<void()> processor)
 {
     processor();
 }
