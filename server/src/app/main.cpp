@@ -1,4 +1,5 @@
-#include "Server.h"
+#include "../core/Server.h"
+#include "../core/Storage.h"
 
 #include <memory>
 
@@ -17,6 +18,7 @@ std::shared_ptr<Server> createServer(int port)
 
 int main(int argc, char *argv[])
 {
+    auto storage = Storage(std::string());
     auto server = createServer(DEFAULT_PORT);
     server->init();
 }
