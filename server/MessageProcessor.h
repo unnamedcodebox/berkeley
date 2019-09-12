@@ -1,11 +1,29 @@
-#ifndef MESSAGEPROCESSOR_H
-#define MESSAGEPROCESSOR_H
+/** @file
+ * @brief     Message processor declaration
+ *
+ * @ingroup   Berkeley
+ *
+ * @copyright (C) 2019
+ */
 
+#pragma once
+
+#include <string>
+#include <vector>
+
+#include "Storage.h"
+
+namespace berkeley
+{
 
 class MessageProcessor
 {
 public:
-    MessageProcessor();
+    explicit MessageProcessor(std::string message);
+
+private:
+    Storage m_storage;
+
 };
 
-#endif // MESSAGEPROCESSOR_H
+} // namespace berkley
