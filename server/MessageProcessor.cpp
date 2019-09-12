@@ -1,19 +1,19 @@
-/** @file
- * @brief     Message processor implementation
- *
- * @ingroup   Berkeley
- *
- * @copyright (C) 2019
- */
+///** @file
+// * @brief     Message processor implementation
+// *
+// * @ingroup   Berkeley
+// *
+// * @copyright (C) 2019
+// */
 
-#include "MessageProcessor.h"
+//#include "MessageProcessor.h"
 
-namespace berkeley
-{
+//namespace berkeley
+//{
 
-MessageProcessor::MessageProcessor(std::string message)
-    : m_storage(Storage(message))
-{
-}
+//MessageProcessor::MessageProcessor(std::string message)
+//    : m_storage(Storage(message))
+//{
+//}
 
-} // berkeley
+//} // berkeley

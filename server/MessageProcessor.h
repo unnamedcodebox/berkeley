@@ -1,29 +1,29 @@
-/** @file
- * @brief     Message processor declaration
- *
- * @ingroup   Berkeley
- *
- * @copyright (C) 2019
- */
+///** @file
+// * @brief     Message processor declaration
+// *
+// * @ingroup   Berkeley
+// *
+// * @copyright (C) 2019
+// */
 
-#pragma once
+//#pragma once
 
-#include <string>
-#include <vector>
+//#include <string>
+//#include <vector>
 
-#include "Storage.h"
+//#include "Storage.h"
 
-namespace berkeley
-{
+//namespace berkeley
+//{
 
-class MessageProcessor
-{
-public:
-    explicit MessageProcessor(std::string message);
+//class MessageProcessor
+//{
+//public:
+//    explicit MessageProcessor(std::string message);
 
-private:
-    Storage m_storage;
+//private:
+//    Storage m_storage;
 
-};
+//};
 
-} // namespace berkley
+//} // namespace berkley

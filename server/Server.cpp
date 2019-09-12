@@ -57,8 +57,8 @@ void Server::init()
 
         if (childPid == 0)
         {
-            close(listenedSocket);
-            auto processor = [connectedSocket]() {
+            auto processor = [connectedSocket]()
+            {
                 char buffer[65537];
                 while (true)
                 {
