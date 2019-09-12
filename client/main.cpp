@@ -8,6 +8,8 @@ using namespace berkeley;
 
 constexpr auto DEFAULT_PORT = 9997;
 
+//std::shared_ptr<Socket> createSocket();
+
 std::shared_ptr<Client> createClient(int port)
 {
     return std::make_shared<Client>(port);
