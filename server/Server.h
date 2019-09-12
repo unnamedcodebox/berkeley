@@ -28,12 +28,9 @@ public:
     void init();
 
     /**
-     * Process method
+     * Process the request method
      */
-   void process(std::function<void()> processor)
-    {
-        processor();
-    }
+   void process(std::function<void()> processor);
 
 private:
 

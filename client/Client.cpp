@@ -23,6 +23,8 @@ namespace berkeley
 namespace
 {
 
+constexpr auto MESSAGE_MAX_LENGTH = 65537;
+
 auto getTime()
 {
     auto moment = std::chrono::system_clock::now();
@@ -46,7 +48,7 @@ void Client::init()
     auto socket = sockets::socket(AF_INET, SOCK_STREAM, 0);
     auto serverAddress = sockaddr_in();
 
-    // TODO - createSocketAddress function
+    // TODO - createSocketAddress function // SocketAddress micro class???
     bzero(&serverAddress, sizeof(serverAddress));
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(m_port);
@@ -59,25 +61,30 @@ void Client::init()
         sizeof(serverAddress));
 
      // TODO - Client processor
-
-
-    auto processor = [socket]() {
-        auto sendBuff = new char[65537];
-        auto replyBuff = new char [65537];
+    auto processor = [socket]()
+    {
+        char sendBuff[MESSAGE_MAX_LENGTH];
+        char replyBuff[MESSAGE_MAX_LENGTH];
 
         while (true)
         {
             std::cin.getline(sendBuff, 65537);
             // TODO - send and recv wrappers
-            send(socket, sendBuff, strlen(sendBuff)+1, 0);
-            if (recv(socket, replyBuff, 65537, 0) <= 0)
+            auto sended = send(socket, sendBuff, strlen(sendBuff), 0);
+            if(sended != (int)strlen(sendBuff))
+            {
+                std::cerr << "SEND ERROR" << "sended size was: " << sended;
+            }
+            std::cout << std::string(sendBuff).length();
+            bzero(replyBuff, sizeof (replyBuff));
+            auto received = static_cast<ssize_t>(recv(socket, replyBuff, 65537, 0));
+            std::cout << " // Received from socket: " << received << " // ";
+            if (received <= 0)
             {
                 break;
             }
             printMessage(replyBuff);
         }
-        delete[] sendBuff;
-        delete[] replyBuff;
     };
 
     process(processor);

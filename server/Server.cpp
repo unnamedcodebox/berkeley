@@ -62,21 +62,20 @@ void Server::init()
             close(listenedSocket);
             auto processor = [connectedSocket]()
             {
-                auto buff = new char[65537];
+                char buff[65537];
                 while (true)
                 {
-                    auto received =  recv(connectedSocket, buff, sizeof(*buff), 0);
-                    if (received <= 0)
+                    auto received =  static_cast<ssize_t>(recv(connectedSocket, buff, 65537, 0));
+                    if (received < 0)
                     {
                         std::cerr << "READ ERROR";
                         break;
                     }
-                    if(send(connectedSocket, buff, received, 0) != sizeof (*buff))
+                    if(static_cast<ssize_t>(send(connectedSocket, buff, received, 0) != received))
                     {
-                        std::cerr << "SEND ERROR: size of sended: " << sizeof (*buff);
+                        std::cerr << "SEND ERROR: size of sended: " << sizeof (buff);
                     };
                 }
-                delete[] buff;
             };
             close(listenedSocket);
             process(processor);
@@ -88,6 +87,11 @@ void Server::init()
         }
         close(connectedSocket);
     }
+}
+
+void Server::process(std::function<void ()> processor)
+{
+    processor();
 }
 
 } // namespace berkeley
