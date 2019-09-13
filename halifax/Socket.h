@@ -11,6 +11,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <string>
 
 namespace berkeley
 {
@@ -65,7 +66,7 @@ sockaddr_in createSocketAddress(int port);
 namespace address
 {
 
-void toBinary(int family, const char* string, void* address);
+void toBinary(int family, std::string ipAddr, void* address);
 
 } // namespace addresses
 

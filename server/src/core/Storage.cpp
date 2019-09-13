@@ -17,7 +17,8 @@
 namespace berkeley
 {
 
-namespace {
+namespace
+{
 
 std::string toInfoString(std::string info, int value)
 {
@@ -29,26 +30,23 @@ std::string toInfoString(std::string info, std::string value)
     return info + value;
 }
 
-} // anonymous
+} // namespace
 
-Storage::Storage(const std::string& message): m_message(message)
+Storage::Storage(const std::string& message) : m_message(message)
 {
-    prepareStorage();
+    parseMessage();
 }
 
-void Storage::prepareStorage()
+void Storage::parseMessage()
 {
-    std::for_each(
-        m_message.begin(), m_message.end(), [this](const auto& element) {
-            if (std::isdigit(element))
-            {
-                auto number = std::atoi(&element);
-                if (number >= 0 && number <= 9)
-                {
-                    m_storage.push_back(number);
-                }
-            }
-        });
+    for (const auto& element : m_message)
+    {
+        if (std::isdigit(element))
+        {
+            auto number = std::stoi(std::string() = element);
+            m_storage.push_back(number);
+        }
+    };
 }
 
 std::string Storage::toSortedString()
@@ -56,7 +54,9 @@ std::string Storage::toSortedString()
     std::sort(m_storage.begin(), m_storage.end(), std::greater<int>());
 
     // Not elegant solution (Boost::join or Qt's join is good for this)
-    return std::accumulate(std::next(m_storage.begin()),m_storage.end(),
+    return std::accumulate(
+        std::next(m_storage.begin()),
+        m_storage.end(),
         std::to_string(*m_storage.begin()),
         [](const auto& lhs, const auto& rhs)
     {
@@ -90,12 +90,14 @@ std::string Storage::toString()
         parts.push_back(toInfoString("Sum is: ", sum()));
         parts.push_back(toInfoString("Sorted is: ", toSortedString()));
 
-        // Another one "join" problem
         auto join = std::accumulate(
             std::next(parts.begin()),
             parts.end(),
             std::string(*parts.begin()),
-            [](const auto& lhs, const auto& rhs) { return lhs + " / " + rhs; });
+            [](const auto& lhs, const auto& rhs)
+        {
+            return lhs + " / " + rhs;
+        });
 
         return "[Message info]: [" + join + "]";
     }
@@ -103,4 +105,4 @@ std::string Storage::toString()
     return {};
 }
 
-} // berkeley
+} // namespace berkeley

@@ -118,9 +118,9 @@ sockaddr* toSockaddrPointer(sockaddr_in* addr)
 namespace address
 {
 
-void toBinary(int family, const char* string, void* address)
+void toBinary(int family, std::string ipAddr, void* address)
 {
-    inet_pton(family, string, address);
+    inet_pton(family, ipAddr.c_str(), address);
 }
 
 } // namespace address

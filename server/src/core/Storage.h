@@ -18,15 +18,11 @@ class Storage
 {
 public:
     explicit Storage(const std::string& message);
+
     Storage() = default;
 
     /**
-     * Parse message and save numbers to storage
-     */
-    void prepareStorage();
-
-    /**
-     * Sort storage
+     * Sort storage and returns result as string
      */
     std::string toSortedString();
 
@@ -49,6 +45,12 @@ public:
      * Print storage to string
      */
     std::string toString();
+
+private:
+    /**
+     * Parse message and save numbers to storage
+     */
+    void parseMessage();
 
 private:
     std::string m_message;

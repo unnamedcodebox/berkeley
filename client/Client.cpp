@@ -28,30 +28,35 @@ constexpr auto MESSAGE_MAX_LENGTH = 65537;
 template <typename T>
 void printMessage(const T& message)
 {
-    std::cout << std::string("[Message from server]: ") << message << " || " << "\n";
+    std::cout << std::string("[Message from server]: ") << message << "\n";
 }
 
 } // anonymous
 
-Client::Client(unsigned int port) : m_port(port) {}
+Client::Client(std::string serverAddress, unsigned int port, ProtocolType type)
+    : m_address(serverAddress), m_port(port), m_type(type)
+{
+}
 
 void Client::init()
 {
-    auto socket = sockets::socket(AF_INET, SOCK_STREAM, 0);
+    auto socket = m_type == ProtocolType::TCP
+                      ? sockets::socket(AF_INET, SOCK_STREAM, 0)
+                      : sockets::socket(AF_INET, SOCK_DGRAM, 0);
     auto serverAddress = sockaddr_in();
 
     bzero(&serverAddress, sizeof(serverAddress));
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(m_port);
 
-    address::toBinary(AF_INET, "127.0.0.1", &serverAddress.sin_addr);
+    address::toBinary(AF_INET, m_address, &serverAddress.sin_addr);
 
     sockets::connect(
         socket,
         sockets_helpers::toSockaddrPointer(&serverAddress),
         sizeof(serverAddress));
 
-    auto processor = [socket]()
+    auto processor = [socket, this, &serverAddress]()
     {
         char sendBuff[MESSAGE_MAX_LENGTH];
         char replyBuff[MESSAGE_MAX_LENGTH];
@@ -60,26 +65,56 @@ void Client::init()
         {
             std::cin.getline(sendBuff, MESSAGE_MAX_LENGTH);
 
-            auto sended = send(socket, sendBuff, strlen(sendBuff), 0);
-
-            if(sended != (int)strlen(sendBuff))
+            if(m_type == ProtocolType::TCP)
             {
-                std::cerr << "SEND ERROR";
+                auto sended = send(socket, sendBuff, strlen(sendBuff), 0);
+
+                if(sended != (int)strlen(sendBuff))
+                {
+                    std::cerr << "SEND ERROR";
+                }
+                bzero(replyBuff, sizeof (replyBuff));
+
+                auto received = static_cast<ssize_t>(
+                    recv(socket, replyBuff, MESSAGE_MAX_LENGTH, 0));
+
+                if (received <= 0)
+                {
+                    break;
+                }
             }
-            bzero(replyBuff, sizeof (replyBuff));
-
-            auto received = static_cast<ssize_t>(
-                recv(socket, replyBuff, MESSAGE_MAX_LENGTH, 0));
-
-            if (received <= 0)
+            else
             {
-                break;
+                socklen_t length = 0;
+                sendto(
+                    socket,
+                    sendBuff,
+                    strlen(sendBuff),
+                    0,
+                    sockets_helpers::toSockaddrPointer(&serverAddress),
+                    sizeof(serverAddress));
+
+                bzero(replyBuff, sizeof (replyBuff));
+
+                auto received = static_cast<ssize_t>(recvfrom(
+                    socket,
+                    replyBuff,
+                    MESSAGE_MAX_LENGTH,
+                    0,
+                    sockets_helpers::toSockaddrPointer(&serverAddress),
+                    &length));
+
+                if (received <= 0)
+                {
+                    break;
+                }
             }
             printMessage(replyBuff);
         }
     };
 
     process(processor);
+    close(socket);
 }
 
 } // namespace berkeley

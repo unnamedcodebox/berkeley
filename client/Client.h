@@ -8,10 +8,18 @@
 
 #include "../halifax/Socket.h"
 
+#include <string>
+
 #pragma once
 
 namespace berkeley
 {
+
+enum class ProtocolType
+{
+    TCP,
+    UDP
+};
 
 /**
  * Class describes client
@@ -20,7 +28,10 @@ class Client
 {
 
 public:
-    explicit Client(unsigned int port);
+    Client(
+        std::string serverAddress,
+        unsigned int port,
+        ProtocolType type = ProtocolType::TCP);
 
     /**
      * Initialize client
@@ -37,8 +48,9 @@ public:
     }
 
 private:
-
+    std::string m_address;
     unsigned int m_port;
+    ProtocolType m_type;
 };
 
 } // berkeley

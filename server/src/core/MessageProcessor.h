@@ -24,7 +24,6 @@ public:
 
 private:
     Storage m_storage;
-
 };
 
 } // namespace berkley
